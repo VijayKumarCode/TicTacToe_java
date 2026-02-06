@@ -14,8 +14,8 @@ import javax.swing.*;
 import java.awt.*;
 
 public class MainFrame extends JFrame {
-    private final CardLayout cardLayout;
-    private final JPanel mainContainer;
+    private  CardLayout cardLayout;
+    private  JPanel mainContainer;
 
     public MainFrame() {
         // 1. Basic Window Setup
