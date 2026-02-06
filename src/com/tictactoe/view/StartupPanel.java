@@ -11,7 +11,7 @@ package com.tictactoe.view;
 import javax.swing.*;
 import java.awt.*;
 
-public class StartUpPanel extends JPanel {
+public class StartupPanel extends JPanel {
     private MainFrame parentFrame;
 
     public StartupPanel(MainFrame frame) {
