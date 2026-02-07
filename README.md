@@ -1,77 +1,138 @@
-                        # 🎮 Tic-Tac-Toe: Ubuntu GUI Edition
+🎮 Tic-Tac-Toe: Ubuntu GUI Edition
 
-[![Java Version](https://img.shields.io/badge/Java-17%2B-orange)](https://www.oracle.com/java/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Style](https://img.shields.io/badge/Architecture-MVC-green)](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller)
-[![Platform](https://img.shields.io/badge/Platform-Ubuntu%20%2F%20Linux-E95420)](https://ubuntu.com/)
+A modular, industry-standard Tic-Tac-Toe application built with Java Swing. This project showcases the transition from CLI logic to a Graphical User Interface (GUI), implementing advanced state management, dependency injection, and loose coupling.
+🚀 Project Overview
 
-A modular, industry-standard Tic-Tac-Toe application built with **Java Swing**. This project showcases the transition from CLI logic to a Graphical User Interface (GUI), implementing advanced state management and loose coupling.
+This application provides a professional gameplay flow designed to demonstrate robust user state handling and UI navigation:
 
----
+    Registered Mode: Captures user credentials via a UserLoginPanel, preserves the username throughout the session, and transitions to the game board.
 
-## 🚀 Project Overview
+    Guest Mode: Allows instant "one-click" play against the AI Agent using an anonymous session.
 
-This application provides a professional gameplay flow designed to demonstrate robust user state handling:
-* **Registered Mode:** Simulates a login flow and player matchmaking in a live lobby.
-* **Guest Mode:** Allows instant play against a built-in **AI Agent**.
+🪙 The "Toss Authority" Feature
 
-### 🪙 The "Toss Authority" Feature
-Unlike traditional Tic-Tac-Toe games, this version introduces **Toss Authority**. The winner of the randomized pre-game toss is granted the power to decide the game's opening strategy:
-1.  **Play First:** Assigns the player "X" and the first move.
-2.  **Pass Turn:** Assigns the player "O" and allows the opponent (or AI) to open the game.
+Unlike traditional Tic-Tac-Toe games, this version introduces Toss Authority. The winner of the randomized pre-game toss is granted the power to decide the game's opening strategy via a custom TossDialog.
+📂 Project Structure
 
----
+This tree represents the clean separation of concerns within the src directory.
+TicTacToe_Project/
+├── .gitignore
+├── README.md
+└── src/
+    └── com/
+        └── tictactoe/
+            ├── Main.java                 # Application Entry Point
+            ├── controller/
+            │   ├── GameController.java   # Core Game Logic & Event Handling
+            │   └── NavigationController.java # CardLayout Navigation
+            ├── model/
+            │   ├── Board.java            # 3x3 Grid Logic
+            │   └── Player.java           # Player Identity & Symbol Data
+            └── view/
+                ├── MainFrame.java        # Main Window (JFrame)
+                ├── StartupPanel.java     # Landing Screen
+                ├── GamePanel.java        # The Tic-Tac-Toe Board UI
+                ├── UserLoginPanel.java   # Authentication UI
+                └── components/
+                    └── TossDialog.java   # Custom Modal for Toss Decision
 
-## 📂 Modular Architecture (MVC)
+                    📂 Modular Architecture (MVC)
+                    Package,Component,Responsibility
+Model,"Board, Player","Manages the 3x3 grid logic, win validation, and player identity persistence."
+View,"MainFrame, GamePanel, StartupPanel, UserLoginPanel",Handles the visual layout and user input events.
+View.components,TossDialog,"Specialized JDialog for handling the pre-game ""Play or Pass"" decision."
+Controller,"GameController, NavigationController",Orchestrates screen transitions and acts as the bridge between UI and Logic.
 
-The project is decoupled into a strictly enforced **Model-View-Controller** pattern to ensure the logic remains independent of the UI—a standard practice in enterprise Java development.
+🛠️ Installation & Setup (Ubuntu/Linux)
+1. Prerequisites
 
-| Package | Component | Responsibility |
-| :--- | :--- | :--- |
-| **Model** | `Board`, `Player`, `GameState` | Manages the 3x3 grid, win validation, and game lifecycle. |
-| **View** | `MainFrame`, `GamePanel` | Handles rendering, Ubuntu-style layouts, and animations. |
-| **Controller** | `GameController` | Acts as the bridge, processing inputs and updating the model. |
+Ensure you have OpenJDK 17 or higher installed:
+sudo apt update
+sudo apt install openjdk-17-jdk
 
----
+You are absolutely right. In the software industry, especially for Ubuntu and open-source projects, a clear Project Structure section is essential. It helps other developers navigate your code without opening every folder.
 
-## 🛠️ Installation & Setup (Ubuntu/Linux)
+I have updated the README to include the badges you requested and a detailed directory tree.
+🎮 Tic-Tac-Toe: Ubuntu GUI Edition
 
-### 1. Prerequisites
-Ensure you have OpenJDK 17 installed:
-```bash
+A modular, industry-standard Tic-Tac-Toe application built with Java Swing. This project showcases the transition from CLI logic to a Graphical User Interface (GUI), implementing advanced state management, dependency injection, and loose coupling.
+🚀 Project Overview
+
+This application provides a professional gameplay flow designed to demonstrate robust user state handling and UI navigation:
+
+    Registered Mode: Captures user credentials via a UserLoginPanel, preserves the username throughout the session, and transitions to the game board.
+
+    Guest Mode: Allows instant "one-click" play against the AI Agent using an anonymous session.
+
+🪙 The "Toss Authority" Feature
+
+Unlike traditional Tic-Tac-Toe games, this version introduces Toss Authority. The winner of the randomized pre-game toss is granted the power to decide the game's opening strategy via a custom TossDialog.
+📂 Project Structure
+
+This tree represents the clean separation of concerns within the src directory.
+Plaintext
+
+TicTacToe_Project/
+├── .gitignore
+├── README.md
+└── src/
+    └── com/
+        └── tictactoe/
+            ├── Main.java                 # Application Entry Point
+            ├── controller/
+            │   ├── GameController.java   # Core Game Logic & Event Handling
+            │   └── NavigationController.java # CardLayout Navigation
+            ├── model/
+            │   ├── Board.java            # 3x3 Grid Logic
+            │   └── Player.java           # Player Identity & Symbol Data
+            └── view/
+                ├── MainFrame.java        # Main Window (JFrame)
+                ├── StartupPanel.java     # Landing Screen
+                ├── GamePanel.java        # The Tic-Tac-Toe Board UI
+                ├── UserLoginPanel.java   # Authentication UI
+                └── components/
+                    └── TossDialog.java   # Custom Modal for Toss Decision
+
+📂 Modular Architecture (MVC)
+Package	Component	Responsibility
+Model	Board, Player	Manages the 3x3 grid logic, win validation, and player identity persistence.
+View	MainFrame, GamePanel, StartupPanel, UserLoginPanel	Handles the visual layout and user input events.
+View.components	TossDialog	Specialized JDialog for handling the pre-game "Play or Pass" decision.
+Controller	GameController, NavigationController	Orchestrates screen transitions and acts as the bridge between UI and Logic.
+🛠️ Installation & Setup (Ubuntu/Linux)
+1. Prerequisites
+
+Ensure you have OpenJDK 17 or higher installed:
+Bash
+
 sudo apt update
 sudo apt install openjdk-17-jdk
 
 2. Clone & Navigate
 
-git clone [https://github.com/VijayKumarCode/TicTacToe_Project.git](https://github.com/VijayKumarCode/TicTacToe_Project.git)
+git clone https://github.com/VijayKumarCode/TicTacToe_Project.git
 cd TicTacToe_Project
 
 3. Build & Run
 
-Using the Terminal:
+# Compile
+javac -d out src/com/tictactoe/Main.java
 
-javac src/com/tictactoe/Main.java -d out
+# Run
 java -cp out com.tictactoe.Main
-
-Using IntelliJ IDEA:
-
-    File > Open > Select the project folder.
-
-    Right-click src/com/tictactoe/Main.java and select Run.
 
 📈 Roadmap
 
-    [x] Initial MVC structure setup.
+[x] Initial MVC structure and package organization.
 
-    [x] Implementation of "Toss Authority" logic.
+    [x] Implementation of "Toss Authority" decision logic.
 
-    [ ] Next: Integration of Minimax AI Agent for "Unbeatable" mode.
+    [x] Session persistence for Registered vs. Guest users.
 
-    [ ] Local persistence for "Registered" user statistics using JSON/File I/O.
+    [ ] Next: Integration of Minimax AI Agent for an "Unbeatable" difficulty mode.
 
-    [ ] Socket-based real-time multiplayer.
+    [ ] Future: JSON-based local storage for player win/loss statistics.
 
 👤 Career Focus
 
-I am an aspiring Remote Software Engineer specializing in Java and Open Source. This project serves as a practical application of my DSA studies and my goal to contribute to the Ubuntu/Canonical ecosystem.
+I am an aspiring Remote Software Engineer specializing in Java and Open Source development. This project serves as a practical application of my Data Structures and Algorithms (DSA) studies and my commitment to writing clean, maintainable code that aligns with the Ubuntu/Canonical ecosystem.
