@@ -10,17 +10,21 @@
 
 package com.tictactoe.view;
 
+import com.tictactoe.controller.GameController;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
 
 public class GamePanel extends JPanel {
     private JButton[] buttons = new JButton[9];
+    private GameController controller;
 
-    public GamePanel() {
+    public GamePanel(GameController controller) {
+        this.controller = controller;
+
         // Industry Standard: Use GridLayout for a perfect square grid
         setLayout(new GridLayout(3, 3, 5, 5)); // 3x3 with 5px gaps
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBackground(new Color(48, 10, 36));
 
         initializeButtons();
     }
@@ -31,18 +35,27 @@ public class GamePanel extends JPanel {
             buttons[i].setFont(new Font("Ubuntu", Font.BOLD, 50));
             buttons[i].setFocusPainted(false);
             buttons[i].setBackground(Color.WHITE);
+            final int index = i;
+            // CALL HERE: When a button is clicked, trigger the move logic
+            buttons[i].addActionListener(e -> controller.handlePlayerMove(index));
             add(buttons[i]);
         }
     }
 
     // This allows the Controller to assign logic to the buttons
-    public void setButtonListener(int index, ActionListener listener) {
-        buttons[index].addActionListener(listener);
-    }
 
     public void updateButton(int index, String symbol) {
-        buttons[index].setText(symbol);
-        buttons[index].setEnabled(false); // Disable after click
+        if (index >= 0 && index < 9) {
+            buttons[index].setText(symbol);
+            buttons[index].setEnabled(false);
+
+            // Set Ubuntu-themed colors for X and O
+            if ("X".equals(symbol)) {
+                buttons[index].setForeground(new Color(233, 84, 32)); // Ubuntu Orange
+            } else {
+                buttons[index].setForeground(new Color(119, 41, 83)); // Ubuntu Purple
+            }
+        }// Disable after click
     }
 
     public void clearBoard() {

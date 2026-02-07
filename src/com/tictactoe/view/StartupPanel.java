@@ -8,18 +8,20 @@
  */
 package com.tictactoe.view;
 
+import com.tictactoe.controller.GameController;
+import com.tictactoe.controller.NavigationController;
 import javax.swing.*;
 import java.awt.*;
 
 public class StartupPanel extends JPanel {
-    private MainFrame parentFrame;
+    private NavigationController nav;
+    private GameController gameController;
 
-    public StartupPanel(MainFrame frame) {
-        this.parentFrame = frame;
+    public StartupPanel(NavigationController nav, GameController gameController) {
+        this.nav = nav;
+        this.gameController = gameController;
         setLayout(new GridBagLayout()); // Centers everything
-
         JPanel content = new JPanel(new GridLayout(3, 1, 10, 10));
-
         JLabel title = new JLabel("Tic Tac Toe", SwingConstants.CENTER);
         title.setFont(new Font("Ubuntu", Font.BOLD, 24));
 
@@ -27,8 +29,10 @@ public class StartupPanel extends JPanel {
         JButton btnGuest = new JButton("Play as Guest");
 
         // Add dummy listeners for now to prove it works
-        btnRegister.addActionListener(e -> JOptionPane.showMessageDialog(this, "Go to Login (To Be Implemented)"));
-        btnGuest.addActionListener(e -> JOptionPane.showMessageDialog(this, "Start AI Game (To Be Implemented)"));
+        // >>> THIS CALL WILL HIGHLIGHT startNewGameFlow IN YOUR CONTROLLER <<<
+        btnRegister.addActionListener(e -> nav.showLogin());
+
+        btnGuest.addActionListener(e -> gameController.handleGuestLogin());
 
         content.add(title);
         content.add(btnRegister);

@@ -10,12 +10,16 @@
 
 package com.tictactoe.view;
 
+import com.tictactoe.controller.GameController;
+import com.tictactoe.controller.NavigationController;
 import javax.swing.*;
 import java.awt.*;
 
 public class MainFrame extends JFrame {
     private  CardLayout cardLayout;
     private  JPanel mainContainer;
+    private NavigationController nav;
+    private GameController gameController;
 
     public MainFrame() {
         // 1. Basic Window Setup
@@ -24,22 +28,32 @@ public class MainFrame extends JFrame {
         setSize(500, 600);
         setLocationRelativeTo(null); // Center on screen
 
-        // 2. Layout Manager Setup
+        // 2. Layout & Controller Initialization
         cardLayout = new CardLayout();
         mainContainer = new JPanel(cardLayout);
+        nav = new NavigationController(mainContainer);
 
-        // 3. Add Screens (Views)
-        // We will add the StartupPanel here in the next step
-        mainContainer.add(new StartupPanel(this), "STARTUP");
+        // Initialize GameController with 'this' frame for dialog centering
+        gameController = new GameController(this, nav);
+
+        // 3. View Initialization & Connection
+        // Creating panels and injecting dependencies
+        StartupPanel startupPanel = new StartupPanel(nav, gameController);
+        UserLoginPanel loginPanel = new UserLoginPanel(nav);
+        GamePanel gamePanel = new GamePanel(gameController);
+
+        // Connect the GameController to the View components
+        gameController.setLoginPanel(loginPanel);
+        gameController.setGamePanel(gamePanel);
+
+        mainContainer.add(startupPanel, "STARTUP");
+        mainContainer.add(loginPanel,"LOGIN");
+        mainContainer.add(gamePanel,"GAME");
 
         add(mainContainer);
 
         // 4. Show Initial Screen
         cardLayout.show(mainContainer, "STARTUP");
-    }
-
-    // Method to switch screens dynamically
-    public void switchTo(String viewName) {
-        cardLayout.show(mainContainer, viewName);
+        nav.showStartup();
     }
 }

@@ -1,10 +1,10 @@
 /**
- * Problem No. #103
- * Difficulty: Intermediate
- * Description: Logic for 3x3 Grid and Win Validation
- * Link: N/A
- * Time Complexity: O(1) - checking 8 possible win lines
- * Space Complexity: O(1) - fixed 3x3 array
+ * Problem No. #101
+ * Difficulty: Easy
+ * Description: Model representing the 3x3 Tic-Tac-Toe grid and win-condition logic
+ * Link: https://leetcode.com/problems/design-tic-tac-toe/
+ * Time Complexity: O(1)
+ * Space Complexity: O(1)
  */
 
 package com.tictactoe.model;
@@ -26,7 +26,7 @@ public class Board {
     }
 
     public boolean makeMove(int row, int col, String symbol) {
-        if (grid[row][col].isEmpty()) { //grid[row][col].equals("") can also be use.
+        if (row >= 0 && row < 3 && col >= 0 && col < 3 && grid[row][col].isEmpty()) {
             grid[row][col] = symbol;
             return true;
         }
@@ -34,12 +34,24 @@ public class Board {
     }
 
     public boolean checkWin(String symbol) {
-        // Check rows, columns, and diagonals
+        if (symbol == null || symbol.isEmpty()) return false;
+        // Check rows, columns
         for (int i = 0; i < 3; i++) {
             if (grid[i][0].equals(symbol) && grid[i][1].equals(symbol) && grid[i][2].equals(symbol)) return true;
             if (grid[0][i].equals(symbol) && grid[1][i].equals(symbol) && grid[2][i].equals(symbol)) return true;
         }
+
+        //diagonals
         if (grid[0][0].equals(symbol) && grid[1][1].equals(symbol) && grid[2][2].equals(symbol)) return true;
         return grid[0][2].equals(symbol) && grid[1][1].equals(symbol) && grid[2][0].equals(symbol);
+
+    }
+    public boolean isFull() {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (grid[i][j].isEmpty()) return false;
+            }
+        }
+        return true;
     }
 }

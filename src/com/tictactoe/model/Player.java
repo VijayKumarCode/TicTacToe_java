@@ -1,7 +1,7 @@
 /**
- * Problem No. #106
+ * Problem No. #104
  * Difficulty: Easy
- * Description: Player model to represent Humans (Registered/Anonymous) and AI Agents
+ * Description: Model representing a player entity with type-based behavior
  * Link: N/A
  * Time Complexity: O(1)
  * Space Complexity: O(1)
