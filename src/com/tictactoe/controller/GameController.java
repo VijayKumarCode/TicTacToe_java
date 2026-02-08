@@ -25,10 +25,12 @@ public class GameController {
     private Player user;
     private Player ai;
     private boolean isUserTurn;
-    private Timer aiTimer;
+
+    private String currentDifficulty = "Easy";
 
     private GamePanel gamePanel;
     private UserLoginPanel loginPanel;
+    private Timer aiTimer;
 
 
 
@@ -39,6 +41,14 @@ public class GameController {
 
         this.user = new Player("ANONYMOUS",  "X",Player.PlayerType.ANONYMOUS);
         this.ai = new Player("AI", "O",Player.PlayerType.AI);
+    }
+
+    public void setDifficulty(String level) {
+        this.currentDifficulty = level;
+        // Industry Tip: Use a status update instead of just a Print statement
+        if (gamePanel != null) {
+            gamePanel.updateStatus("Difficulty: " + level);
+        }
     }
 
     public void setGamePanel(GamePanel gamePanel) {
@@ -110,7 +120,7 @@ public class GameController {
 
     public void handleHomeNavigation() {
         if (aiTimer != null && aiTimer.isRunning()) {
-            aiTimer.stop(); // The AI "thinking" is cancelled immediately
+            aiTimer.stop(); // The AI "thinking" is canceled immediately
         }
         nav.showStartup();
     }
@@ -171,25 +181,133 @@ public class GameController {
     }
 
     private void triggerAIMove() {
-        if (ai.getType() == Player.PlayerType.AI) {
-            // Placeholder for future AI/Minimax implementation
-            for (int i = 0; i < 9; i++) {
-                int r = i / 3;
-                int c = i % 3;
+        // 1. Safety check
+        if (ai.getType() != Player.PlayerType.AI) return;
 
-                // USE HERE: getAiSymbol() is now used to mark the board
-                if (board.makeMove(r, c, getAiSymbol())) {
-                    gamePanel.updateButton(i, getAiSymbol());
+        int moveIndex = switch (currentDifficulty) {
+            case "Hard" -> getBestMoveMinimax();
+            case "Medium" -> getSmartMove();
+            default -> getRandomMove();
+        };
 
-                    if (checkGameOver(getAiSymbol())) {
-                        return;
-                    }
+        // 2. Strategy Switching based on currentDifficulty
 
-                    isUserTurn = true;
-                    break;
+        // 3. Execute the chosen move
+        if (moveIndex != -1) {
+            executeAIMove(moveIndex);
+        }
+    }
+
+    private void executeAIMove(int index) {
+        int r = index / 3;
+        int c = index % 3;
+
+        if (board.makeMove(r, c, getAiSymbol())) {
+            gamePanel.updateButton(index, getAiSymbol());
+
+            if (checkGameOver(getAiSymbol())) return;
+
+            isUserTurn = true;
+            gamePanel.updateStatus("Your Turn (" + getUserSymbol() + ")");
+        }
+    }
+
+    /**
+     * EASY LOGIC: Picks a random empty spot.
+     */
+    private int getRandomMove() {
+        java.util.List<Integer> available = new java.util.ArrayList<>();
+        for (int i = 0; i < 9; i++) {
+            // Checking if the square is empty
+            if (board.getSymbolAt(i).isEmpty()) {
+                available.add(i);
+            }
+        }
+        if (available.isEmpty()) return -1;
+        return available.get(new java.util.Random().nextInt(available.size()));
+    }
+
+    /**
+     * MEDIUM LOGIC: Wins if possible, blocks if necessary, otherwise moves randomly.
+     */
+    private int getSmartMove() {
+        // 1. Can AI win in one move?
+        for (int i = 0; i < 9; i++) {
+            if (canMoveLeadToWin(i, getAiSymbol())) return i;
+        }
+
+        // 2. Is User about to win? Block!
+        for (int i = 0; i < 9; i++) {
+            if (canMoveLeadToWin(i, getUserSymbol())) return i;
+        }
+
+        // 3. Otherwise, fall back to random
+        return getRandomMove();
+    }
+
+    private int getBestMoveMinimax() {
+        int bestScore = Integer.MIN_VALUE;
+        int move = -1;
+
+        for (int i = 0; i < 9; i++) {
+            if (board.getSymbolAt(i).isEmpty()) {
+                board.setSymbolAt(i, getAiSymbol()); // Try move
+                int score = minimax(board, 0, false);
+                board.setSymbolAt(i, ""); // Undo move
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    move = i;
                 }
             }
         }
+        return move;
+    }
+
+    private int minimax(Board b, int depth, boolean isMaximizing) {
+        // Base Cases: Check for terminal states
+        if (b.getWinningIndices(getAiSymbol()) != null) return 10 - depth;
+        if (b.getWinningIndices(getUserSymbol()) != null) return depth - 10;
+        if (b.isFull()) return 0;
+
+        int bestScore;
+        if (isMaximizing) {
+            bestScore = Integer.MIN_VALUE;
+            for (int i = 0; i < 9; i++) {
+                if (b.getSymbolAt(i).isEmpty()) {
+                    b.setSymbolAt(i, getAiSymbol());
+                    int score = minimax(b, depth + 1, false);
+                    b.setSymbolAt(i, "");
+                    bestScore = Math.max(score, bestScore);
+                }
+            }
+        } else {
+            bestScore = Integer.MAX_VALUE;
+            for (int i = 0; i < 9; i++) {
+                if (b.getSymbolAt(i).isEmpty()) {
+                    b.setSymbolAt(i, getUserSymbol());
+                    int score = minimax(b, depth + 1, true);
+                    b.setSymbolAt(i, "");
+                    bestScore = Math.min(score, bestScore);
+                }
+            }
+        }
+        return bestScore;
+    }
+
+    /**
+     * SIMULATION LOGIC: Temporarily places a symbol to see if it results in a win.
+     */
+    private boolean canMoveLeadToWin(int index, String symbol) {
+        if (!board.getSymbolAt(index).isEmpty()) return false;
+
+        // Simulation: Try the move
+        board.setSymbolAt(index, symbol);
+        boolean wins = (board.getWinningIndices(symbol) != null);
+
+        // Cleanup: Undo the move immediately!
+        board.setSymbolAt(index, "");
+        return wins;
     }
 
     private void announceWinner(Player winner) {

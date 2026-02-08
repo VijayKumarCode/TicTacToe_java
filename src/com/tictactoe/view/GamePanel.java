@@ -1,5 +1,5 @@
 
-/**
+/*
  * Problem No. #105
  * Difficulty: Intermediate
  * Description: The 3x3 Grid UI for Tic Tac Toe
@@ -27,29 +27,48 @@ public class GamePanel extends JPanel {
         setBackground(new Color(48, 10, 36)); // Ubuntu Dark Purple
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
+        // --- TOP BAR SECTION ---
+        JPanel topBar = new JPanel(new BorderLayout(15, 0)); // Added horizontal gap
+        topBar.setOpaque(false);
+
+        // 1. Home Button (West)
+        JButton homeButton = new JButton("Home");
+        styleNavButton(homeButton);
+        homeButton.addActionListener(e -> handleHomeRequest());
+        // 2. Status Label (Center)
         statusLabel = new JLabel("Your Turn!", SwingConstants.CENTER);
         statusLabel.setFont(new Font("Ubuntu", Font.BOLD, 18));
         statusLabel.setForeground(Color.WHITE);
 
-        JPanel topBar = new JPanel(new BorderLayout());
-        topBar.setOpaque(false);
+        // 3. NEW: Difficulty Selector (East)
+        String[] levels = {"Easy", "Medium", "Hard"};
+        JComboBox<String> difficultyBox = new JComboBox<>(levels);
+        styleComboBox(difficultyBox);
+        difficultyBox.addActionListener(e -> {
+            String selected = (String) difficultyBox.getSelectedItem();
+            controller.setDifficulty(selected);
+        });
 
-        JButton homeButton = new JButton("Home");
-        styleNavButton(homeButton);
-        // This triggers the NavigationController via your GameController
-        homeButton.addActionListener(e -> handleHomeRequest());
-
+        // Putting it all together in the topBar
         topBar.add(homeButton, BorderLayout.WEST);
         topBar.add(statusLabel, BorderLayout.CENTER);
+        topBar.add(difficultyBox, BorderLayout.EAST);
 
-        // Center: Game Grid
+        // --- GRID SECTION ---
         JPanel gridPanel = new JPanel(new GridLayout(3, 3, 8, 8));
         gridPanel.setOpaque(false);
-
         initializeButtons(gridPanel);
 
         add(topBar, BorderLayout.NORTH);
         add(gridPanel, BorderLayout.CENTER);
+    }
+
+    private void styleComboBox(JComboBox<String> box) {
+        box.setBackground(new Color(119, 41, 83)); // Ubuntu Purple
+        box.setForeground(Color.WHITE);
+        box.setFont(new Font("Ubuntu", Font.PLAIN, 14));
+        // Helps with some UI themes to show background correctly
+        box.setOpaque(true);
     }
 
     private void initializeButtons(JPanel panel) {

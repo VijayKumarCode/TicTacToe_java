@@ -10,7 +10,7 @@
 package com.tictactoe.model;
 
 public class Board {
-    private String[][] grid;
+    private final String[][] grid;
 
     public Board() {
         grid = new String[3][3];
@@ -33,8 +33,18 @@ public class Board {
         return false;
     }
 
-    public boolean checkWin(String symbol) {
-        return getWinningIndices(symbol) != null;
+    /**
+     * NEW: Utility for AI to "peek" at a cell using a single index (0-8).
+     */
+    public String getSymbolAt(int index) {
+        return grid[index / 3][index % 3];
+    }
+
+    /**
+     * NEW: Utility for AI to simulate or undo moves during difficulty calculation.
+     */
+    public void setSymbolAt(int index, String symbol) {
+        grid[index / 3][index % 3] = symbol;
     }
 
     public int[] getWinningIndices(String symbol) {
