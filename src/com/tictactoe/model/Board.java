@@ -34,18 +34,37 @@ public class Board {
     }
 
     public boolean checkWin(String symbol) {
-        if (symbol == null || symbol.isEmpty()) return false;
-        // Check rows, columns
-        for (int i = 0; i < 3; i++) {
-            if (grid[i][0].equals(symbol) && grid[i][1].equals(symbol) && grid[i][2].equals(symbol)) return true;
-            if (grid[0][i].equals(symbol) && grid[1][i].equals(symbol) && grid[2][i].equals(symbol)) return true;
+        return getWinningIndices(symbol) != null;
+    }
+
+    public int[] getWinningIndices(String symbol) {
+            if (symbol == null || symbol.isEmpty()) return null;
+
+            // Check rows
+            for (int i = 0; i < 3; i++) {
+                if (grid[i][0].equals(symbol) && grid[i][1].equals(symbol) && grid[i][2].equals(symbol)) {
+                    return new int[]{i * 3, i * 3 + 1, i * 3 + 2};
+                }
+            }
+
+            // Check columns
+            for (int i = 0; i < 3; i++) {
+                if (grid[0][i].equals(symbol) && grid[1][i].equals(symbol) && grid[2][i].equals(symbol)) {
+                    return new int[]{i, i + 3, i + 6};
+                }
+            }
+
+            // Check diagonals
+            if (grid[0][0].equals(symbol) && grid[1][1].equals(symbol) && grid[2][2].equals(symbol)) {
+                return new int[]{0, 4, 8};
+            }
+            if (grid[0][2].equals(symbol) && grid[1][1].equals(symbol) && grid[2][0].equals(symbol)) {
+                return new int[]{2, 4, 6};
+            }
+
+            return null;
         }
 
-        //diagonals
-        if (grid[0][0].equals(symbol) && grid[1][1].equals(symbol) && grid[2][2].equals(symbol)) return true;
-        return grid[0][2].equals(symbol) && grid[1][1].equals(symbol) && grid[2][0].equals(symbol);
-
-    }
     public boolean isFull() {
         for (int r = 0; r < 3; r++) {
             for (int c = 0; c < 3; c++) {

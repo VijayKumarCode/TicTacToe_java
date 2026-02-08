@@ -25,6 +25,7 @@ public class GameController {
     private Player user;
     private Player ai;
     private boolean isUserTurn;
+    private Timer aiTimer;
 
     private GamePanel gamePanel;
     private UserLoginPanel loginPanel;
@@ -49,21 +50,29 @@ public class GameController {
         this.loginPanel.addLoginListener(this::handleLogin);
     }
     public void handlePlayerMove(int index) {
+        // 1. Guard Clauses: Ensure it's the user's turn and the game isn't over
         if (!isUserTurn()) return;
 
         int row = index / 3;
         int col = index % 3;
 
-        // 1. Update Model (Highlights board.makeMove)
+        // 2. Update Model (Logical board)
         if (board.makeMove(row, col, getUserSymbol())) {
-            // 2. Update View
+
+            // 3. Update View (Visual board)
             gamePanel.updateButton(index, getUserSymbol());
+
+            // 4. Check Termination: Win or Draw
             if (checkGameOver(getUserSymbol())) return;
+
+            // 5. Switch Turn
             isUserTurn = false;
-            // UX: Slight delay so AI move doesn't feel instant/robotic
-            Timer timer = new Timer(500, e -> triggerAIMove());
-            timer.setRepeats(false);
-            timer.start();
+
+            // 6. Trigger AI with Lifecycle Management
+            // We assign the timer to our class field so handleHomeNavigation() can stop it
+            aiTimer = new Timer(500, e -> triggerAIMove());
+            aiTimer.setRepeats(false);
+            aiTimer.start();
         }
     }
     private void handleLogin(ActionEvent e) {
@@ -97,6 +106,13 @@ public class GameController {
 
         // 3. Prepare the board and start the Toss
         startNewGameFlow();
+    }
+
+    public void handleHomeNavigation() {
+        if (aiTimer != null && aiTimer.isRunning()) {
+            aiTimer.stop(); // The AI "thinking" is cancelled immediately
+        }
+        nav.showStartup();
     }
 
     public void startNewGameFlow() {
@@ -191,10 +207,16 @@ public class GameController {
     }
 
     private boolean checkGameOver(String symbol) {
-        // 1. Check for Win
-        if (board.checkWin(symbol)) {
+        int[] winningIndices = board.getWinningIndices(symbol);
+
+        if (winningIndices != null) {
+            if (gamePanel != null) {
+                gamePanel.highlightWinningPath(winningIndices);
+                gamePanel.updateStatus("Game Over!");
+            }
+
             Player winner = (user.getSymbol().equals(symbol)) ? user : ai;
-            announceWinner(winner); // Delegate to the specialized method
+            announceWinner(winner);
             return true;
         }
 
