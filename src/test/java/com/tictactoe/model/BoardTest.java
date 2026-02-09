@@ -9,7 +9,6 @@ package com.tictactoe.model;
  * Space Complexity: O(1)
  */
 
-import com.tictactoe.model.Board;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
@@ -23,6 +22,11 @@ class BoardTest {
         board = new Board(); // Fresh board before every test
     }
 
+    // Helper method to simulate a "checkWin" since Board uses getWinningIndices
+    private boolean checkWin(String symbol) {
+        return board.getWinningIndices(symbol) != null;
+    }
+
     @Test
     @DisplayName("Should detect a horizontal win")
     void testHorizontalWin() {
@@ -30,7 +34,7 @@ class BoardTest {
         board.makeMove(0, 1, "X");
         board.makeMove(0, 2, "X");
 
-        assertTrue(board.checkWin("X"), "X should have won on the top row");
+        assertTrue(checkWin("X"), "X should have won on the top row");
         assertArrayEquals(new int[]{0, 1, 2}, board.getWinningIndices("X"));
     }
 
@@ -41,7 +45,9 @@ class BoardTest {
         board.makeMove(1, 1, "O");
         board.makeMove(2, 2, "O");
 
-        assertTrue(board.checkWin("O"), "O should have won on the main diagonal");
+        // FIX: getWinningIndices returns an array, so we check if it is not null
+        assertNotNull(board.getWinningIndices("O"), "O should have won on the main diagonal");
+        assertArrayEquals(new int[]{0, 4, 8}, board.getWinningIndices("O"));
     }
 
     @Test
