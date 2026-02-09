@@ -1,4 +1,6 @@
-# 🎮 Tic-Tac-Toe: Ubuntu GUI Edition
+🎮 Tic-Tac-Toe: Ubuntu GUI Edition
+
+A modular, industry-standard Tic-Tac-Toe application built with Java Swing. This project showcases high-level software engineering principles including the MVC pattern, Minimax AI, and Unit Testing.
 
 [![Java Version](https://img.shields.io/badge/Java-17%2B-orange)](https://www.oracle.com/java/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -24,49 +26,67 @@ The winner of the randomized pre-game toss is granted the power to decide the op
 
 ## 📂 Project Structure
 
-```text
 TicTacToe_Project/
+├── src/
+│   └── main/java/com/tictactoe/
+│       ├── Main.java                 # Application Entry Point
+│       ├── controller/
+│       │   ├── GameController.java   # Game Logic & Minimax
+│       │   └── NavigationController.java # CardLayout Navigation
+│       ├── model/
+│       │   ├── Board.java            # Grid State Logic
+│       │   ├── GameState.java        # Match Status Tracking
+│       │   └── Player.java           # Player Entities
+│       └── view/
+│           ├── MainFrame.java        # Primary Window
+│           ├── GamePanel.java        # Main Game Screen
+│           ├── StartupPanel.java     # Landing Screen
+│           ├── UserLoginPanel.java   # Authentication UI
+│           └── components/           # Reusable UI Widgets
+│               ├── BoardPanel.java      # Isolated 3x3 Grid
+│               ├── ScoreBoardPanel.java # Player Stats Display
+│               └── TossDialog.java      # Modal Choice UI
+├── test/java/com/tictactoe/model/
+│   └── BoardTest.java                # Unit Tests for Board Logic
 ├── .gitignore
 ├── README.md
-└── src/
-    └── com/
-        └── tictactoe/
-            ├── Main.java                 # Entry Point
-            ├── controller/
-            │   ├── GameController.java   # Logic & Events
-            │   └── NavigationController.java # CardLayout
-            ├── model/
-            │   ├── Board.java            # Grid Logic
-            │   └── Player.java           # Player Data
-            └── view/
-                ├── MainFrame.java        # Main Window
-                ├── StartupPanel.java     # Landing Screen
-                ├── GamePanel.java        # Board UI
-                ├── UserLoginPanel.java   # Login UI
-                └── components/
-                    └── TossDialog.java   # Toss Modal
-                    
-                    🏗️ Modular Architecture (MVC)
-                    Package,Component,Responsibility
-Package,Component,Responsibility
-Model,"Board, Player",Manages the 3x3 grid logic and player identity persistence.
-View,"MainFrame, GamePanel",Handles the visual layout and user input events.
-View.components,TossDialog,Specialized JDialog for pre-game decisions.
-Controller,GameController,Orchestrates screen transitions and bridges UI with Logic.
+└── TicTacToe_Project.iml
 
-🛠️ Installation & Setup (Ubuntu/Linux)
-1. Prerequisites
+🏗️ Technical Highlights
+1. Component-Based UI
 
-Ensure you have OpenJDK 17 installed:
-sudo apt update
-sudo apt install openjdk-17-jdk
+Instead of one giant file, the View is now split into specialized components:
 
-2. Build & Run
+    BoardPanel: Dedicated to rendering the grid and handling button clicks.
+
+    ScoreBoardPanel: Tracks and displays wins/losses in real-time.
+
+    TossDialog: A modal interface for the "Toss Authority" feature.
+
+2. Robust State Management
+
+The addition of GameState.java allows the controller to track whether the 
+game is in progress, paused, or finished independently of the UI state.
+
+3. Unit Testing (QA focused)
+
+The inclusion of BoardTest.java demonstrates a "Test-Driven" mindset. 
+This ensures that win conditions and draw logic are verified automatically
+before every release.
+
+                    🛠️ Build & Test (Ubuntu/Linux)
+Run Production Code
+
 # Compile
-javac -d out src/com/tictactoe/Main.java
+javac -d out src/main/java/com/tictactoe/**/*.java src/main/java/com/tictactoe/*.java
 
 # Run
-java -cp out main.java.com.tictactoe.Main
+java -cp out com.tictactoe.Main
+
+Run Unit Tests
+
+# Ensure JUnit is in your classpath
+java -jar junit-platform-console-standalone.jar --class-path out --select-class com.tictactoe.model.BoardTest
 
 📈 Roadmap
 
@@ -74,11 +94,13 @@ java -cp out main.java.com.tictactoe.Main
 
     [x] Implementation of "Toss Authority" decision logic.
 
-    [x] Session persistence for Registered vs. Guest users.
+    [x] Integration of Minimax AI Agent (Hard Difficulty).
 
-    [ ] Next: Integration of Minimax AI Agent for an "Unbeatable" difficulty mode.
+    [x] New: Refactored View into reusable Components (BoardPanel, ScoreBoardPanel).
 
-    [ ] Future: JSON-based local storage for player win/loss statistics.
+    [x] New: Added JUnit Test Suite for core model logic.
+
+    [ ] Next: Persistence Layer using JSON for local leaderboard statistics.
 
     👤 Career Focus
 
