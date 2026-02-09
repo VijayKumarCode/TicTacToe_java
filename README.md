@@ -18,6 +18,8 @@ The winner of the randomized pre-game toss is granted the power to decide the op
     Pass Turn: Assigns the player "O" and allows the AI to open the game.
     
 ## 📂 Project Structure
+
+```text
 TicTacToe_Project/
 ├── src/
 │   └── main/java/com/tictactoe/
@@ -44,23 +46,22 @@ TicTacToe_Project/
 ├── README.md
 └── TicTacToe_Project.iml
 
-🏗️ Technical Highlights
-1. Component-Based UI
+## 🏗️ Technical Highlights
 
-The View is split into specialized, reusable components to ensure high maintainability:
+### 1. Component-Based UI
+The **View** is split into specialized, reusable components to ensure high maintainability and loose coupling:
+* **BoardPanel**: Dedicated to rendering the 3x3 grid and managing button events.
+* **ScoreBoardPanel**: Tracks and displays real-time match statistics and player scores.
+* **TossDialog**: A custom modal interface that implements the "Toss Authority" logic.
 
-    BoardPanel: Dedicated to rendering the grid and handling button clicks.
+### 2. Robust State Management
+The implementation of `GameState.java` allows the `GameController` to track whether the match is **Active**, **Paused**, or **Terminal** (Win/Draw) completely independent of the UI state. This follows the **Single Responsibility Principle**.
 
-    ScoreBoardPanel: Tracks and displays wins/losses in real-time.
-
-    TossDialog: A modal interface for the "Toss Authority" decision.
-
-2. Robust State Management
-
-The inclusion of GameState.java allows the controller to track whether the game is in progress, paused, or finished independently of the UI state.
-3. Unit Testing (QA Focused)
-
-The inclusion of BoardTest.java demonstrates a Test-Driven mindset. This ensures that win conditions and draw logic are verified automatically before every release.
+### 3. Unit Testing (QA Focused)
+The inclusion of `BoardTest.java` demonstrates a **Test-Driven Development (TDD)** mindset. This ensures that:
+* All 8 win conditions (rows, columns, diagonals) are verified.
+* Draw logic and board-full states are handled without regression.
+* The core game logic remains stable as the UI evolves.
                    🛠️ Build & Test (Ubuntu/Linux)
 Run Production Code
 # Compile
