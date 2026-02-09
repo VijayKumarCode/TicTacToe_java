@@ -16,9 +16,8 @@ The winner of the randomized pre-game toss is granted the power to decide the op
     Play First: Assigns the player "X" and the first move.
 
     Pass Turn: Assigns the player "O" and allows the AI to open the game.
-
+    
 ## 📂 Project Structure
-
 TicTacToe_Project/
 ├── src/
 │   └── main/java/com/tictactoe/
@@ -48,7 +47,7 @@ TicTacToe_Project/
 🏗️ Technical Highlights
 1. Component-Based UI
 
-The View is split into specialized, reusable components:
+The View is split into specialized, reusable components to ensure high maintainability:
 
     BoardPanel: Dedicated to rendering the grid and handling button clicks.
 
@@ -58,11 +57,10 @@ The View is split into specialized, reusable components:
 
 2. Robust State Management
 
-The inclusion of GameState.java allows the controller to track whether the game is in progress, paused, or finished independently of UI state.
-3. Unit Testing (QA focused)
+The inclusion of GameState.java allows the controller to track whether the game is in progress, paused, or finished independently of the UI state.
+3. Unit Testing (QA Focused)
 
-The inclusion of BoardTest.java demonstrates a Test-Driven mindset, ensuring win conditions and draw logic are verified automatically.
-
+The inclusion of BoardTest.java demonstrates a Test-Driven mindset. This ensures that win conditions and draw logic are verified automatically before every release.
                    🛠️ Build & Test (Ubuntu/Linux)
 Run Production Code
 # Compile
