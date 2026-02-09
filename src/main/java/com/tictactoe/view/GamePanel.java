@@ -13,6 +13,7 @@ package com.tictactoe.view;
 
 
 import com.tictactoe.controller.GameController;
+import com.tictactoe.view.components.BoardPanel;
 import com.tictactoe.view.components.ScoreBoardPanel;
 
 import javax.swing.*;

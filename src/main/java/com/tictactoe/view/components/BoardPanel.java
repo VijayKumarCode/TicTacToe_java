@@ -1,4 +1,4 @@
-package com.tictactoe.view;
+package com.tictactoe.view.components;
 
 /**
  * Problem No. #130
