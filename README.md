@@ -17,31 +17,47 @@ The winner of the randomized pre-game toss is granted the power to decide the op
 
     Pass Turn: Assigns the player "O" and allows the AI to open the game.
     
+# Tic-Tac-Toe Java Project
+
+A professional, MVC-patterned Tic-Tac-Toe application featuring a Minimax-based AI, user authentication, and persistent leaderboards. Built and deployed on Ubuntu using Amazon Corretto 17.
+
 ## 📂 Project Structure
 
 ```text
 TicTacToe_Project/
 ├── src/
-│   └── main/java/com/tictactoe/
-│       ├── Main.java                 # Application Entry Point
-│       ├── controller/
-│       │   ├── GameController.java   # Game Logic & Minimax
-│       │   └── NavigationController.java # CardLayout Navigation
-│       ├── model/
-│       │   ├── Board.java            # Grid State Logic
-│       │   ├── GameState.java        # Match Status Tracking
-│       │   └── Player.java           # Player Entities
-│       └── view/
-│           ├── MainFrame.java        # Primary Window
-│           ├── GamePanel.java        # Main Game Screen
-│           ├── StartupPanel.java     # Landing Screen
-│           ├── UserLoginPanel.java   # Authentication UI
-│           └── components/           # Reusable UI Widgets
-│               ├── BoardPanel.java      # Isolated 3x3 Grid
-│               ├── ScoreBoardPanel.java # Player Stats Display
-│               └── TossDialog.java      # Modal Choice UI
+│   └── main/
+│       ├── java/com/tictactoe/
+│       │   ├── Main.java                 # Application Entry Point
+│       │   ├── controller/
+│       │   │   ├── GameController.java       # Game Logic & Minimax
+│       │   │   └── NavigationController.java # CardLayout Navigation
+│       │   ├── model/
+│       │   │   ├── Board.java                # Grid State Logic
+│       │   │   ├── GameState.java            # Match Status Tracking
+│       │   │   └── Player.java               # Player Entities
+│       │   ├── network/
+|       |   |   └──NetworkManager.java        # Network communication logic
+│       │   └── view/
+│       │       ├── MainFrame.java            # Primary Window
+│       │       ├── GamePanel.java            # Main Game Screen
+│       │       ├── StartupPanel.java         # Landing Screen
+│       │       ├── UserLoginPanel.java       # Authentication UI
+│       │       └── components/               # Reusable UI Widgets
+│       │           ├── BoardPanel.java       # Isolated 3x3 Grid
+│       │           ├── ScoreBoardPanel.java  # Player Stats Display
+│       │           └── TossDialog.java       # Modal Choice UI
+│       └── resources/                    # Configs and Manifests
+│           └── META-INF/
+│               └── MANIFEST.MF           # JAR Entry Point Config
 ├── test/java/com/tictactoe/model/
-│   └── BoardTest.java                # Unit Tests for Board Logic
+│   └── BoardTest.java                    # Unit Tests for Board Logic
+├── out/
+│   └── artifacts/
+│       └── TicTacToe_Project_jar/        # Compiled Deployment Folder
+│           ├── TicTacToe_Project.jar     # Executable Artifact
+│           ├── players.json              # Persistent User Data
+│           └── leaderboard.json          # Persistent Global Stats
 ├── .gitignore
 ├── README.md
 └── TicTacToe_Project.iml
