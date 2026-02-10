@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Ubuntu_Expert",
+    "symbol": "O",
+    "type": "AI",
+    "status": "Online"
+  },
+  {
+    "name": "Vijay_Dev",
+    "symbol": "O",
+    "type": "REGISTERED",
+    "status": "Online"
+  }
+]

@@ -38,7 +38,7 @@ public class BoardPanel extends JPanel {
             buttons[i].setOpaque(true);
 
             final int index = i;
-            buttons[i].addActionListener(e -> controller.handlePlayerMove(index));
+            buttons[i].addActionListener(e -> controller.handleCellClick(index));
             add(buttons[i]);
         }
     }

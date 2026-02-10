@@ -1,5 +1,9 @@
 package com.tictactoe.model;
 
+import javax.swing.*;
+
+import static java.lang.System.out;
+
 /**
  * Problem No. #101
  * Difficulty: Easy
@@ -28,13 +32,12 @@ public class Board {
     }
 
     public boolean makeMove(int row, int col, String symbol) {
-        if (row >= 0 && row < 3 && col >= 0 && col < 3 && grid[row][col].isEmpty()) {
+        if (grid[row][col].isEmpty()) {
             grid[row][col] = symbol;
             return true;
         }
         return false;
     }
-
     /**
      * NEW: Utility for AI to "peek" at a cell using a single index (0-8).
      */

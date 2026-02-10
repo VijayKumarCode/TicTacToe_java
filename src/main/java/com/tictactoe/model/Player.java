@@ -20,14 +20,24 @@ public class Player {
     private String name;
     private String symbol; // "X" or "O"
     private PlayerType type;
+    private String status;
 
-    public Player(String name, String symbol, PlayerType type) {
+    public Player(String name, String symbol, PlayerType type,String status) {
         this.name = name;
         this.symbol = symbol;
         this.type = type;
+        this.status = status;
+    }
+    // Getters and Setters
+    public String getStatus() {
+        return status;
     }
 
-    // Getters and Setters
+
+     // It is also good practice to add a setter so you can update it later
+    public void setStatus(String status) {
+        this.status = status;
+    }
     public String getName() {
         return name;
     }
@@ -46,6 +56,6 @@ public class Player {
 
     @Override
     public String toString() {
-        return name + " (" + type + ") as " + symbol;
+        return name + " (" + status + ")";
     }
 }

@@ -11,7 +11,6 @@ package com.tictactoe.view;
 
 
 
-
 import com.tictactoe.controller.GameController;
 import com.tictactoe.view.components.BoardPanel;
 import com.tictactoe.view.components.ScoreBoardPanel;
@@ -24,44 +23,58 @@ public class GamePanel extends JPanel {
     private final JLabel statusLabel;
     private final BoardPanel boardPanel; // Reference to our new sub-panel
     private final ScoreBoardPanel scoreBoard;
-    public GamePanel(GameController controller) {
+    public GamePanel(GameController controller ) {
         this.controller = controller;
-
         setLayout(new BorderLayout(10, 10));
-        setBackground(new Color(48, 10, 36)); // Ubuntu Dark Purple
+        setBackground(new Color(48, 10, 36));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // --- TOP BAR (North) ---
         JPanel topBar = new JPanel(new BorderLayout(15, 0));
         topBar.setOpaque(false);
 
+        this.boardPanel = new BoardPanel(controller);
+        this.scoreBoard = new ScoreBoardPanel();
+
+        // 1. Navigation Group (Left side)
+        JPanel navGroup = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        navGroup.setOpaque(false);
+
         JButton homeButton = new JButton("Home");
         styleNavButton(homeButton);
         homeButton.addActionListener(e -> handleHomeRequest());
 
+        JButton lobbyButton = new JButton("Lobby");
+        styleNavButton(lobbyButton);
+        lobbyButton.addActionListener(e -> handleLobbyRequest());
+
+        navGroup.add(homeButton);
+        navGroup.add(lobbyButton);
+
+        // 2. Status Label (Center)
         statusLabel = new JLabel("Your Turn!", SwingConstants.CENTER);
         statusLabel.setFont(new Font("Ubuntu", Font.BOLD, 18));
         statusLabel.setForeground(Color.WHITE);
 
+        // 3. Difficulty (Right side)
         String[] levels = {"Easy", "Medium", "Hard"};
         JComboBox<String> difficultyBox = new JComboBox<>(levels);
         styleComboBox(difficultyBox);
         difficultyBox.addActionListener(e -> controller.setDifficulty((String) difficultyBox.getSelectedItem()));
 
-        topBar.add(homeButton, BorderLayout.WEST);
-        topBar.add(statusLabel, BorderLayout.CENTER);
-        topBar.add(difficultyBox, BorderLayout.EAST);
+        // --- CRUCIAL: ADD COMPONENTS TO THE TOPBAR ---
+        topBar.add(navGroup, BorderLayout.WEST);      // Buttons on left
+        topBar.add(statusLabel, BorderLayout.CENTER); // Label in middle
+        topBar.add(difficultyBox, BorderLayout.EAST); // Box on right
 
-        // --- BOARD GRID (Center) ---
-        this.boardPanel = new BoardPanel(controller);
-
-        // --- SCOREBOARD (South) ---
-        this.scoreBoard = new ScoreBoardPanel(); // 2. Initialized
-
-        // 3. Added to layout regions
+        // --- FINALLY: ADD TOPBAR TO PANEL ---
         add(topBar, BorderLayout.NORTH);
         add(boardPanel, BorderLayout.CENTER);
         add(scoreBoard, BorderLayout.SOUTH);
+
+        revalidate();
+        repaint();
+
     }
 
     // --- DELEGATION METHODS ---
@@ -111,5 +124,15 @@ public class GamePanel extends JPanel {
     private void handleHomeRequest() {
         int confirm = JOptionPane.showConfirmDialog(this, "Quit match?", "Confirm", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) controller.handleHomeNavigation();
+    }
+
+    private void handleLobbyRequest() {
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Return to lobby? (Current match will end)",
+                "Confirm", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            controller.handleBackToLobby(); // This clears status and switches screen
+        }
     }
 }
