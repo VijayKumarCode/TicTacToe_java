@@ -31,7 +31,7 @@ import java.util.List;
 public class GameController {
     private boolean isGameActive = true;
 
-    // --- NETWORK FIELDS ---
+// --- NETWORK FIELDS ---
     private ServerSocket serverSocket;
     private Socket socket;
     private PrintWriter out;
@@ -39,21 +39,26 @@ public class GameController {
     private boolean isMyTurn; // Vital for multi-player sync
     private String mySymbol;
 
-    // 1. Final Dependencies (Immutable - These never change)
+// 1. Final Dependencies (Immutable - These never change)
     private final Board board;
     private final JFrame parentFrame;
     private final NavigationController nav;
 
-    // 2. Game State & Logic (Mutable)
+// 2. Game State & Logic (Mutable)
     private Player user;
-    private Player ai;       // Generic computer opponent
-    private Player opponent; // Specific opponent selected from Lobby
+    private Player ai;
+    private Player opponent;
     private boolean isUserTurn;
+
+/** * Guard to prevent AI from triggering multiple moves
+ * simultaneously (e.g., during Toss transitions).
+ */
+    private boolean isAiProcessing = false;
 
     public enum Difficulty { EASY, MEDIUM, HARD }
     private Difficulty difficulty = Difficulty.EASY;
 
-    // 3. View Components & Utilities (Lifecycle managed)
+// 3. View Components & Utilities (Lifecycle managed)
     private GamePanel gamePanel;
     private UserLoginPanel loginPanel;
     private LobbyPanel lobbyPanel;
@@ -106,23 +111,35 @@ public class GameController {
     public void startAsClient(String targetIp) {
         new Thread(() -> {
             try {
-                socket = new Socket(targetIp, 5555);
+                // Added a 5-second timeout so the app doesn't hang forever
+                socket = new Socket();
+                socket.connect(new java.net.InetSocketAddress(targetIp, 5555), 5000);
+
                 mySymbol = "O";
                 isMyTurn = false;
                 setupStreams();
+                updateStatus("Connected to Host!");
+            } catch (java.net.SocketTimeoutException e) {
+                showError("Connection timed out. Is the Host online?");
             } catch (IOException e) {
-                SwingUtilities.invokeLater(() ->
-                        JOptionPane.showMessageDialog(null, "Host not found on WiFi!"));
+                showError("Could not find Host at " + targetIp + " on port 5555.");
             }
         }).start();
+    }
+
+    private void showError(String message) {
+        SwingUtilities.invokeLater(() ->
+                JOptionPane.showMessageDialog(parentFrame, message, "Connection Error", JOptionPane.ERROR_MESSAGE)
+        );
     }
 
 
     public void setDifficulty(String level) {
         try {
             this.difficulty = Difficulty.valueOf(level.toUpperCase());
+            // Push the update to the UI
             if (gamePanel != null) {
-                gamePanel.updateStatus("Difficulty: " + level);
+                gamePanel.setDifficultyDisplay(level);
             }
         } catch (IllegalArgumentException e) {
             this.difficulty = Difficulty.EASY;
@@ -160,28 +177,30 @@ public class GameController {
     public void setLobbyPanel(LobbyPanel lobbyPanel) {
         this.lobbyPanel = lobbyPanel;
     }
+
     public void handleCellClick(int index) {
-        // Check if game is active AND it is the player's turn (handles both AI and WiFi)
+        // 1. Basic activity and turn check
         if (!isGameActive || (!isUserTurn && !isMyTurn)) return;
+        if (!board.getSymbolAt(index).isEmpty()) return;
 
-        // WiFi logic: Send move if connected
-        if (out != null) {
-            out.println("MOVE:" + index);
-            isMyTurn = false; // Turn switch for WiFi
-        }
+        // 2. Determine if this is a WiFi match
+        boolean isWiFiMatch = (socket != null && !socket.isClosed());
 
-        // AI logic: Switch turn for AI
-        if (ai != null && ai.getType() == Player.PlayerType.AI) {
-            isUserTurn = false;
-        }
-
+        // 3. EXECUTE MOVE
         executeMove(index, mySymbol != null ? mySymbol : user.getSymbol());
 
-        // Update status label based on the next action
-        if (out != null) {
-            updateStatus("Opponent's Turn...");
+        if (isWiFiMatch) {
+            // --- WIFI LOGIC ---
+            out.println("MOVE:" + index);
+            isMyTurn = false;
+            isUserTurn = false; // Ensure both turn flags are locked
+            updateStatus("Waiting for Opponent...");
         } else if (ai != null && ai.getType() == Player.PlayerType.AI) {
+            // --- AI LOGIC ---
+            isUserTurn = false;
             updateStatus("AI is thinking...");
+
+            // Only trigger AI if it's NOT a WiFi match
             aiTimer = new Timer(500, e -> triggerAIMove());
             aiTimer.setRepeats(false);
             aiTimer.start();
@@ -212,11 +231,29 @@ public class GameController {
         this.user = new Player("Guest", "X", Player.PlayerType.ANONYMOUS, "Online");
         this.ai = new Player("AI", "O", Player.PlayerType.AI, "Online");
 
-        // 1. Switch the screen first
+        // 1. SELECT DIFFICULTY
+        String[] options = {"Easy", "Medium", "Hard"};
+        int selection = JOptionPane.showOptionDialog(parentFrame,
+                "Select AI Difficulty:",
+                "Guest Match",
+                JOptionPane.DEFAULT_OPTION,
+                JOptionPane.QUESTION_MESSAGE,
+                null, options, options[0]);
+
+        if (selection == JOptionPane.CLOSED_OPTION) return;
+
+        // Store the selected difficulty
+        String chosenLevel = options[selection];
+        this.difficulty = Difficulty.valueOf(chosenLevel.toUpperCase());
+
+        // 2. NAVIGATE & INITIALIZE UI
         nav.showGame();
 
-        // 2. Wait for the UI to "breathe" and draw the buttons
+        // 3. UPDATE UI LABEL & START TOSS
         SwingUtilities.invokeLater(() -> {
+            if (gamePanel != null) {
+                gamePanel.setDifficultyDisplay(chosenLevel); // Make it visible immediately
+            }
             startNewGameFlow();
         });
     }
@@ -242,41 +279,78 @@ public class GameController {
     }
 
     public void startNewGameFlow() {
-        // 1. Perform the Toss
-        // CALL HERE: Clear the UI buttons before starting a new round
+        this.isAiProcessing = false;
+        this.isGameActive = true; // Reactive the board for the new round [cite: 2026-01-20]
+
+        // 1. Clear Local UI
         if (gamePanel != null) {
             gamePanel.clearBoard();
         }
-
-        // Reset the internal logical board
         board.resetBoard();
-        boolean userWonToss = Math.random() < 0.5;
 
-        if (userWonToss) {
-            handleUserTossWin();
+        // 2. WIFI MATCH LOGIC
+        if (socket != null && !socket.isClosed()) {
+            if (serverSocket != null) { // I am the Host
+                // Tell the client to clear their screen before the toss [cite: 2026-01-20]
+                out.println("RESET_GAME");
+
+                boolean hostWonToss = Math.random() < 0.5;
+                out.println("TOSS_RESULT:" + hostWonToss);
+                handleNetworkToss(hostWonToss);
+            }
+            // Client waits for messages in listenForOpponent()
         } else {
-            handleAITossWin();
+            // 3. LOCAL/AI MATCH LOGIC
+            boolean userWonToss = Math.random() < 0.5;
+            if (userWonToss) {
+                handleUserTossWin();
+            } else {
+                handleAITossWin();
+            }
+
+            if (!isUserTurn) {
+                triggerAIMove();
+            }
         }
-        if (!isUserTurn) {
-            triggerAIMove();
+    }
+
+    private void handleNetworkToss(boolean iWon) {
+        if (iWon) {
+            handleUserTossWin(); // Show the choice dialog to the winner
+        } else {
+            updateStatus("Opponent won the toss. Waiting for their choice...");
+            isMyTurn = false;
         }
     }
 
     private void handleUserTossWin() {
-
         TossDialog dialog = new TossDialog(parentFrame, "You");
         dialog.setVisible(true);
+
+        boolean isWiFi = (socket != null && !socket.isClosed());
 
         if (dialog.isPlayFirst()) {
             user.setSymbol("X");
             ai.setSymbol("O");
             isUserTurn = true;
-            gamePanel.updateStatus("You play first (X)"); // Update the label you just made visible!
+            isMyTurn = true; // For WiFi matches
+            updateStatus("You play first (X)");
+
+            if (isWiFi) out.println("OPPONENT_DECISION:SECOND");
         } else {
+            // PLAYER CHOSE TO PASS (Play Second)
             user.setSymbol("O");
             ai.setSymbol("X");
             isUserTurn = false;
-            gamePanel.updateStatus("AI plays first (X)");
+            isMyTurn = false; // You cannot play now!
+            updateStatus("Opponent plays first (X)");
+
+            if (isWiFi) {
+                out.println("OPPONENT_DECISION:FIRST");
+            } else {
+                // If local AI, trigger its move
+                triggerAIMove();
+            }
         }
     }
 
@@ -294,32 +368,57 @@ public class GameController {
     }
 
     private void triggerAIMove() {
-        if (ai.getType() != Player.PlayerType.AI) return;
+        // Strict guard check
+        if (isAiProcessing || isUserTurn || ai.getType() != Player.PlayerType.AI || !isGameActive) return;
 
-        int moveIndex = switch (difficulty) {
-            case HARD -> getBestMoveMinimax();
-            case MEDIUM -> getSmartMove();
-            case EASY -> getRandomMove();
+        isAiProcessing = true;
+        updateStatus("AI is thinking...");
+
+        // Background the move calculation so the UI doesn't stutter
+        SwingWorker<Integer, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Integer doInBackground() {
+                return switch (difficulty) {
+                    case HARD -> getBestMoveMinimax();
+                    case MEDIUM -> getSmartMove();
+                    default -> getRandomMove();
+                };
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    int moveIndex = get();
+                    if (moveIndex != -1) {
+                        executeAIMove(moveIndex);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    isAiProcessing = false;
+                }
+            }
         };
-
-        if (moveIndex != -1) {
-            executeAIMove(moveIndex);
-        }
+        worker.execute();
     }
 
     private void executeAIMove(int index) {
         int r = index / 3;
         int c = index % 3;
 
-        if (board.makeMove(r, c, getAiSymbol())) {
-            gamePanel.updateButton(index, getAiSymbol());
+        try {
+            if (board.makeMove(r, c, getAiSymbol())) {
+                gamePanel.updateButton(index, getAiSymbol());
 
-            if (checkGameOver(getAiSymbol())) return;
+                if (checkGameOver(getAiSymbol())) return;
 
-            isUserTurn = true;
-
-            // --- RESET STATUS ---
-            gamePanel.updateStatus("Your Turn! (" + getUserSymbol() + ")");
+                // Switch turn back to user
+                isUserTurn = true;
+                gamePanel.updateStatus("Your Turn! (" + getUserSymbol() + ")");
+            }
+        } finally {
+            // ALWAYS release the guard last, so the next move can happen
+            isAiProcessing = false;
         }
     }
 
@@ -422,17 +521,32 @@ public class GameController {
     }
 
     private void announceWinner(Player winner) {
-        String message = String.format("%s (%s) has won the match!",
-                winner.getName(), winner.getSymbol());
+        isGameActive = false; // Immediately stop all clicks [cite: 2026-01-20]
+        String message = String.format("%s (%s) has won!", winner.getName(), winner.getSymbol());
 
-        // This call will make the method "highlighted" in GamePanel
         if (gamePanel != null) {
             String type = (winner.getType() == Player.PlayerType.AI) ? "AI" : "USER";
             gamePanel.updateScore(type);
         }
 
+        // Blocking Dialog: Code stops here until "OK" is clicked [cite: 2026-01-08]
         JOptionPane.showMessageDialog(parentFrame, message, "Victory", JOptionPane.INFORMATION_MESSAGE);
-        startNewGameFlow();
+
+        // WIFI SYNC: Only the Server (Host) decides when the next match starts [cite: 2026-01-20]
+        if (socket != null && !socket.isClosed()) {
+            if (serverSocket != null) { // I am the Host
+                startNewGameFlow();
+            } else {
+                updateStatus("Waiting for Host to start next match...");
+            }
+        } else {
+            // Local/AI Flow
+            if (user.getType() == Player.PlayerType.ANONYMOUS) {
+                handleGuestLogin();
+            } else {
+                startNewGameFlow();
+            }
+        }
     }
 
     private void announceDraw() {
@@ -480,9 +594,43 @@ public class GameController {
             try {
                 String msg;
                 while ((msg = in.readLine()) != null) {
-                    if (msg.startsWith("MOVE:")) {
+                    // 1. Handle Game Reset Signal (Prevents the overlapping windows)
+                    if (msg.equals("RESET_GAME")) {
+                        SwingUtilities.invokeLater(() -> {
+                            board.resetBoard();
+                            if (gamePanel != null) gamePanel.clearBoard();
+                            isGameActive = true;
+                            updateStatus("Host is starting a new match...");
+                        });
+                    }
+                    // 2. Handle the Toss Decision from the other player
+                    else if (msg.startsWith("DECISION:") || msg.startsWith("OPPONENT_DECISION:")) {
+                        String choice = msg.split(":")[1];
+                        SwingUtilities.invokeLater(() -> {
+                            if (choice.equals("OPPONENT_PLAYS_FIRST") || choice.equals("FIRST")) {
+                                mySymbol = "X";
+                                isMyTurn = true;
+                                isUserTurn = true;
+                                updateStatus("Opponent passed! Your turn (X)");
+                            } else {
+                                mySymbol = "O";
+                                isMyTurn = false;
+                                isUserTurn = false;
+                                updateStatus("Opponent is playing first (X)");
+                            }
+                        });
+                    }
+                    // 3. Handle actual moves
+                    else if (msg.startsWith("MOVE:")) {
                         int index = Integer.parseInt(msg.split(":")[1]);
                         handleIncomingMove(index);
+                    }
+                    // 4. Handle the Toss Result
+                    else if (msg.startsWith("TOSS_RESULT:")) {
+                        boolean hostWon = Boolean.parseBoolean(msg.split(":")[1]);
+                        boolean iAmClient = (serverSocket == null);
+                        boolean iWon = iAmClient ? !hostWon : hostWon;
+                        SwingUtilities.invokeLater(() -> handleNetworkToss(iWon));
                     }
                 }
             } catch (IOException e) {

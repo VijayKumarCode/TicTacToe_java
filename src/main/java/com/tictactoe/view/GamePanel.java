@@ -21,12 +21,14 @@ import java.awt.*;
 public class GamePanel extends JPanel {
     private final GameController controller;
     private final JLabel statusLabel;
-    private final BoardPanel boardPanel; // Reference to our new sub-panel
+    private final JLabel difficultyLabel; // Changed from JComboBox to JLabel
+    private final BoardPanel boardPanel;
     private final ScoreBoardPanel scoreBoard;
-    public GamePanel(GameController controller ) {
+
+    public GamePanel(GameController controller) {
         this.controller = controller;
         setLayout(new BorderLayout(10, 10));
-        setBackground(new Color(48, 10, 36));
+        setBackground(new Color(48, 10, 36)); // Ubuntu Purple
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // --- TOP BAR (North) ---
@@ -56,25 +58,44 @@ public class GamePanel extends JPanel {
         statusLabel.setFont(new Font("Ubuntu", Font.BOLD, 18));
         statusLabel.setForeground(Color.WHITE);
 
-        // 3. Difficulty (Right side)
-        String[] levels = {"Easy", "Medium", "Hard"};
-        JComboBox<String> difficultyBox = new JComboBox<>(levels);
-        styleComboBox(difficultyBox);
-        difficultyBox.addActionListener(e -> controller.setDifficulty((String) difficultyBox.getSelectedItem()));
+        // 3. Persistent Difficulty Display (Right side)
+        difficultyLabel = new JLabel("Level: Easy");
+        difficultyLabel.setFont(new Font("Ubuntu", Font.ITALIC, 16));
+        difficultyLabel.setForeground(new Color(240, 119, 70)); // Canonical Orange
+        difficultyLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
 
-        // --- CRUCIAL: ADD COMPONENTS TO THE TOPBAR ---
-        topBar.add(navGroup, BorderLayout.WEST);      // Buttons on left
-        topBar.add(statusLabel, BorderLayout.CENTER); // Label in middle
-        topBar.add(difficultyBox, BorderLayout.EAST); // Box on right
+        // --- ADD COMPONENTS TO THE TOPBAR ---
+        topBar.add(navGroup, BorderLayout.WEST);
+        topBar.add(statusLabel, BorderLayout.CENTER);
+        topBar.add(difficultyLabel, BorderLayout.EAST);
 
-        // --- FINALLY: ADD TOPBAR TO PANEL ---
         add(topBar, BorderLayout.NORTH);
         add(boardPanel, BorderLayout.CENTER);
         add(scoreBoard, BorderLayout.SOUTH);
+    }
 
-        revalidate();
-        repaint();
+    public void setDifficultyDisplay(String level) {
+        difficultyLabel.setText("Level: " + level);
 
+        // Dynamic coloring for a professional touch
+        switch (level.toUpperCase()) {
+            case "HARD" -> difficultyLabel.setForeground(Color.RED);
+            case "MEDIUM" -> difficultyLabel.setForeground(Color.YELLOW);
+            default -> difficultyLabel.setForeground(new Color(240, 119, 70));
+        }
+    }
+
+    // ... (rest of your existing delegation methods: updateButton, updateScore, etc.)
+
+    public void updateStatus(String text) {
+        statusLabel.setText(text);
+    }
+
+    private void styleNavButton(JButton btn) {
+        btn.setBackground(new Color(119, 41, 83));
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setFont(new Font("Ubuntu", Font.PLAIN, 14));
     }
 
     // --- DELEGATION METHODS ---
@@ -105,34 +126,13 @@ public class GamePanel extends JPanel {
         updateStatus("New Game Started");
     }
 
-    public void updateStatus(String text) {
-        statusLabel.setText(text);
-    }
-
-    private void styleNavButton(JButton btn) {
-        btn.setBackground(new Color(119, 41, 83));
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-    }
-
-    private void styleComboBox(JComboBox<String> box) {
-        box.setBackground(new Color(119, 41, 83));
-        box.setForeground(Color.WHITE);
-        box.setOpaque(true);
-    }
-
     private void handleHomeRequest() {
         int confirm = JOptionPane.showConfirmDialog(this, "Quit match?", "Confirm", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) controller.handleHomeNavigation();
     }
 
     private void handleLobbyRequest() {
-        int confirm = JOptionPane.showConfirmDialog(this,
-                "Return to lobby? (Current match will end)",
-                "Confirm", JOptionPane.YES_NO_OPTION);
-
-        if (confirm == JOptionPane.YES_OPTION) {
-            controller.handleBackToLobby(); // This clears status and switches screen
-        }
+        int confirm = JOptionPane.showConfirmDialog(this, "Return to lobby?", "Confirm", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) controller.handleBackToLobby();
     }
 }
