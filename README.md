@@ -60,6 +60,9 @@ TicTacToe_Project/
 │           └── leaderboard.json          # Persistent Global Stats
 ├── .gitignore
 ├── README.md
+├── leaderboard.json
+├── players.json
+├── pom.xml
 └── TicTacToe_Project.iml
 
 ## 🏗️ Technical Highlights
