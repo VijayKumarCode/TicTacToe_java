@@ -1,6 +1,6 @@
 package com.tictactoe;
 
-/**
+/*
  * Problem No. #100
  * Difficulty: Beginner
  * Description: Application Entry Point
