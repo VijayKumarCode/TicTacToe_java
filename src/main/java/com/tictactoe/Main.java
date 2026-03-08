@@ -9,8 +9,6 @@ package com.tictactoe;
  * Space Complexity: N/A
  */
 
-
-
 import com.tictactoe.view.MainFrame;
 import javax.swing.SwingUtilities;
 
